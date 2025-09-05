@@ -1,0 +1,13 @@
+<h1>My Submissions</h1>
+{% for sub in submissions %}
+    <div>
+        <p>Submitted at: {{ sub.created_at }}</p>
+        <p>Status: <strong>{{ sub.get_status_display }}</strong></p>
+        {% if sub.status == 'COMPLETE' and sub.evaluationresult %}
+            <p>Score: {{ sub.evaluationresult.score }}</p>
+        {% elif sub.status == 'ERROR' and sub.evaluationresult %}
+            <p>Error: {{ sub.evaluationresult.details.error }}</p>
+        {% endif %}
+        <hr>
+    </div>
+{% endfor %}
