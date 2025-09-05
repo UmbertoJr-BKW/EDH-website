@@ -1,3 +1,5 @@
+
+# hackathon/settings.py
 """
 Django settings for hackathon project.
 
@@ -9,23 +11,44 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
 from pathlib import Path
+from decouple import config # Import the config function
+import dj_database_url    # Import the database url parser
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Read the SECRET_KEY from the environment variable
+# This will crash if SECRET_KEY is not set, which is good for production.
+SECRET_KEY = config('SECRET_KEY')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Read the DEBUG value, defaulting to False if not set.
+# The `cast=bool` ensures the string "False" becomes the boolean False.
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p^n+2&(@rq5#b-!5q0v!$od+w=z@@_v#6l9j^&h0dkxe=nbp$h'
+# Read ALLOWED_HOSTS from a comma-separated string
+# e.g., "mysite.com,www.mysite.com"
+ALLOWED_HOSTS_str = config('ALLOWED_HOSTS', default='')
+ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_str.split(',') if host.strip()]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+# from pathlib import Path
+
+# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# # Quick-start development settings - unsuitable for production
+# # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = 'django-insecure-p^n+2&(@rq5#b-!5q0v!$od+w=z@@_v#6l9j^&h0dkxe=nbp$h'
+
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+
+# ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -81,6 +104,13 @@ DATABASES = {
 }
 
 
+# Database configuration
+# This is the key part for connecting to Render's PostgreSQL
+default_db_url = 'sqlite:///' + str(BASE_DIR / 'db.sqlite3')
+DATABASES = {
+    'default': dj_database_url.config(default=default_db_url)
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -121,3 +151,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# --- Google Cloud Storage Configuration ---
+GS_BUCKET_NAME = config('GS_BUCKET_NAME', default=None)
+GS_CREDENTIALS_FILE_PATH = config('GOOGLE_APPLICATION_CREDENTIALS', default=None)
+
+if GS_BUCKET_NAME and GS_CREDENTIALS_FILE_PATH:
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    
+    GS_PROJECT_ID = config('GS_PROJECT_ID', default=None) # Keep this for clarity
+    
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        GS_CREDENTIALS_FILE_PATH
+    )

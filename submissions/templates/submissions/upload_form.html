@@ -1,7 +1,16 @@
 <!-- submissions/templates/submissions/upload_form.html -->
 <h1>Upload Your Submission</h1>
+<p>Please upload all 7 required .parquet files.</p>
+
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    <p><label for="id_file1">File 1:</label> <input type="file" name="file1" required id="id_file1"></p>
+    <p><label for="id_file2">File 2:</label> <input type="file" name="file2" required id="id_file2"></p>
+    <p><label for="id_file3">File 3:</label> <input type="file" name="file3" required id="id_file3"></p>
+    <p><label for="id_file4">File 4:</label> <input type="file" name="file4" required id="id_file4"></p>
+    <p><label for="id_file5">File 5:</label> <input type="file" name="file5" required id="id_file5"></p>
+    <p><label for="id_file6">File 6:</label> <input type="file" name="file6" required id="id_file6"></p>
+    <p><label for="id_file7">File 7:</label> <input type="file" name="file7" required id="id_file7"></p>
+    <br>
     <button type="submit">Submit</button>
 </form>

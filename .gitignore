@@ -1,0 +1,19 @@
+# Environment variables
+.env
+
+# Django local database
+db.sqlite3
+
+# Python virtual environment
+venv/
+
+# Add this to ignore all JSON files
+*.json 
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# User-uploaded media and static files
+# (adjust if your media root is different)
+uploads/

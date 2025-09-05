@@ -1,5 +1,9 @@
+# submissions/models.py
+
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
+
 
 # Defines the state of a submission
 class SubmissionStatus(models.TextChoices):
@@ -9,17 +13,24 @@ class SubmissionStatus(models.TextChoices):
     ERROR = 'ERROR', 'Error'
 
 class Submission(models.Model):
-    # Link to the user who submitted
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=SubmissionStatus.choices, default=SubmissionStatus.PENDING)
 
-    # Fields for each of the 7 Parquet files
-    # The `upload_to` path will be like: 'uploads/username/submission_id/file1.parquet'
     def get_upload_path(instance, filename):
-        return f'uploads/{instance.user.username}/{instance.id}/{filename}'
+        # --- DEBUG PRINT 4: See if this function is called ---
+        print(f"--- INSIDE get_upload_path ---")
+        print(f"    -> Instance ID: {instance.id}")
+        print(f"    -> Instance User: {instance.user}")
+        print(f"    -> Original Filename: {filename}")
+        path = f'uploads/{instance.user.username}/{instance.id}/{filename}'
+        print(f"    -> Generated Path: {path}")
+        print(f"----------------------------")
+        return path
 
     file1 = models.FileField(upload_to=get_upload_path)
+    # ... (all other file fields are the same) ...
     file2 = models.FileField(upload_to=get_upload_path)
     file3 = models.FileField(upload_to=get_upload_path)
     file4 = models.FileField(upload_to=get_upload_path)
@@ -29,7 +40,7 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"Submission by {self.user.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
-
+    
 class EvaluationResult(models.Model):
     # A one-to-one link to the submission it evaluates
     submission = models.OneToOneField(Submission, on_delete=models.CASCADE, primary_key=True)
