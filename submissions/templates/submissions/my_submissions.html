@@ -1,13 +1,44 @@
-<h1>My Submissions</h1>
-{% for sub in submissions %}
-    <div>
-        <p>Submitted at: {{ sub.created_at }}</p>
-        <p>Status: <strong>{{ sub.get_status_display }}</strong></p>
-        {% if sub.status == 'COMPLETE' and sub.evaluationresult %}
-            <p>Score: {{ sub.evaluationresult.score }}</p>
-        {% elif sub.status == 'ERROR' and sub.evaluationresult %}
-            <p>Error: {{ sub.evaluationresult.details.error }}</p>
-        {% endif %}
-        <hr>
-    </div>
-{% endfor %}
+{% extends "base.html" %}
+
+{% block title %}My Submissions{% endblock %}
+
+{% block content %}
+    <h2>My Submission History</h2>
+
+    {% if submissions %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Submitted At</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Files Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td>{{ submission.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ submission.get_status_display }}</td>
+                    <td>
+                        {% if submission.status == 'COMPLETE' and submission.evaluationresult %}
+                            {{ submission.evaluationresult.score|floatformat:4 }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        <ul class="file-list">
+                            {% for filename in submission.get_submitted_files %}
+                                <li>{{ filename }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have not made any submissions yet. <a href="{% url 'upload_submission' %}">Submit your first one!</a></p>
+    {% endif %}
+{% endblock %}

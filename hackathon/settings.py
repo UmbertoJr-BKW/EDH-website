@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic', 
     'django.contrib.staticfiles',
-    'submissions'
+    'submissions',
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -173,3 +174,11 @@ if GS_BUCKET_NAME and GS_CREDENTIALS_FILE_PATH:
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
         GS_CREDENTIALS_FILE_PATH
     )
+
+
+# --- Authentication Settings ---
+# Where to redirect users after a successful login
+LOGIN_REDIRECT_URL = 'my_submissions' 
+
+# Where to redirect users after they log out
+LOGOUT_REDIRECT_URL = 'home'

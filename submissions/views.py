@@ -1,28 +1,15 @@
 # submissions/views.py
-
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .forms import SubmissionForm
-from .models import Submission, EvaluationResult # Ensure all models are imported
+from .models import Submission, EvaluationResult
 from storages.backends.gcloud import GoogleCloudStorage
 
 @login_required
 def upload_submission(request):
     if request.method == 'POST':
-        
-        # --- The Definitive Upload Logic ---
-
-        # 1. Create and save the submission record WITHOUT any files.
-        #    This gets a UUID and a record in the database first.
         submission = Submission.objects.create(user=request.user)
-        print(f"-> Step 1: Created initial DB record with ID: {submission.id}")
-
-        # 2. Manually instantiate the correct storage backend.
-        #    We are no longer relying on Django's `default_storage`.
         storage = GoogleCloudStorage()
-        print(f"-> Step 2: Manually created storage object of type: {type(storage)}")
 
-        # 3. Loop through the files, upload them, and update the model.
         files_to_upload = {
             'file1': request.FILES.get('file1'),
             'file2': request.FILES.get('file2'),
@@ -31,37 +18,30 @@ def upload_submission(request):
             'file5': request.FILES.get('file5'),
             'file6': request.FILES.get('file6'),
             'file7': request.FILES.get('file7'),
+            'file8': request.FILES.get('file8'), # Optional
+            'file9': request.FILES.get('file9'), # Optional
         }
 
-        all_files_valid = True
+        # Validate that the first 7 (required) files are present
+        required_files_present = all(files_to_upload[f'file{i}'] for i in range(1, 8))
+
+        if not required_files_present:
+            submission.delete()
+            # You should add a Django message here to give user feedback
+            # messages.error(request, "Submission failed. The first 7 files are required.")
+            print("-> ERROR: Incomplete submission. Required files missing. Record deleted.")
+            return redirect('upload_submission')
+
+        # Upload all provided files
         for field_name, uploaded_file in files_to_upload.items():
             if uploaded_file:
-                # Generate the path using our model's function.
                 file_path = submission.get_upload_path(uploaded_file.name)
-                
-                # Use our manual storage object to save the file.
                 storage.save(file_path, uploaded_file)
-                
-                # Set the file path on the model instance.
                 setattr(submission, field_name, file_path)
                 print(f"   -> Manually uploaded {file_path}")
-            else:
-                # Handle case where a file is missing
-                print(f"   -> WARNING: File for '{field_name}' is missing!")
-                all_files_valid = False
-        
-        if all_files_valid:
-            # 4. Save the submission again to update all the file path fields.
-            submission.save()
-            print("-> Step 4: Updated submission record with all file paths.")
-        else:
-            # Optional: Delete the submission if it's incomplete.
-            submission.delete()
-            print("-> ERROR: Incomplete submission. Record deleted.")
-            # You could redirect to an error page here.
-            return redirect('upload_submission') # Or wherever you want to send them
-        
 
+        submission.save()
+        print("-> Step 4: Updated submission record with all file paths.")
         return redirect('my_submissions')
     else:
         return render(request, 'submissions/upload_form.html')

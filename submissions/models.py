@@ -1,6 +1,7 @@
 # submissions/models.py
 
 import uuid
+import os
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -29,17 +30,32 @@ class Submission(models.Model):
         print(f"----------------------------")
         return path
 
-    file1 = models.FileField(upload_to=get_upload_path)
-    # ... (all other file fields are the same) ...
-    file2 = models.FileField(upload_to=get_upload_path)
-    file3 = models.FileField(upload_to=get_upload_path)
-    file4 = models.FileField(upload_to=get_upload_path)
-    file5 = models.FileField(upload_to=get_upload_path)
-    file6 = models.FileField(upload_to=get_upload_path)
-    file7 = models.FileField(upload_to=get_upload_path)
+    # First 7 are required
+    file1 = models.FileField(upload_to=get_upload_path) # base_consumption.parquet
+    file2 = models.FileField(upload_to=get_upload_path) # pv_profiles.parquet
+    file3 = models.FileField(upload_to=get_upload_path) # ev_profiles.parquet
+    file4 = models.FileField(upload_to=get_upload_path) # hp_profiles.parquet
+    file5 = models.FileField(upload_to=get_upload_path) # battery_in_profiles.parquet
+    file6 = models.FileField(upload_to=get_upload_path) # battery_out_profiles.parquet
+    file7 = models.FileField(upload_to=get_upload_path) # battery_soc_profiles.parquet
+
+    # Last 2 are optional
+    file8 = models.FileField(upload_to=get_upload_path, blank=True, null=True) # curtailed_energy_profiles.parquet
+    file9 = models.FileField(upload_to=get_upload_path, blank=True, null=True) # power_to_hydro.parquet
 
     def __str__(self):
         return f"Submission by {self.user.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+    
+    # New helper method to list submitted files
+    def get_submitted_files(self):
+        files = []
+        # Loop through all 9 file fields
+        for i in range(1, 10):
+            field = getattr(self, f'file{i}')
+            if field: # This checks if the field has a file
+                # os.path.basename gets just the filename from the full path
+                files.append(os.path.basename(field.name))
+        return files
     
 class EvaluationResult(models.Model):
     # A one-to-one link to the submission it evaluates

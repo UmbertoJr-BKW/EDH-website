@@ -1,0 +1,47 @@
+<!-- submissions/templates/base.html -->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hackathon Platform{% endblock %}</title>
+    <!-- Link to the new stylesheet -->
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{% url 'home' %}" class="logo">
+                <img src="{% static 'images/logo.png' %}" alt="Hackathon Logo">
+            </a>
+            <ul>
+                <li><a href="{% url 'leaderboard' %}">Leaderboard</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'my_submissions' %}">My Submissions</a></li>
+                    <li><a href="{% url 'upload_submission' %}" class="btn">New Submission</a></li>
+                    <li>
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-button-link">Logout</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'register' %}" class="btn">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="card">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

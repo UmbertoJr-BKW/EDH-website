@@ -1,16 +1,50 @@
-<!-- submissions/templates/submissions/upload_form.html -->
-<h1>Upload Your Submission</h1>
-<p>Please upload all 7 required .parquet files.</p>
+{% extends "base.html" %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <p><label for="id_file1">File 1:</label> <input type="file" name="file1" required id="id_file1"></p>
-    <p><label for="id_file2">File 2:</label> <input type="file" name="file2" required id="id_file2"></p>
-    <p><label for="id_file3">File 3:</label> <input type="file" name="file3" required id="id_file3"></p>
-    <p><label for="id_file4">File 4:</label> <input type="file" name="file4" required id="id_file4"></p>
-    <p><label for="id_file5">File 5:</label> <input type="file" name="file5" required id="id_file5"></p>
-    <p><label for="id_file6">File 6:</label> <input type="file" name="file6" required id="id_file6"></p>
-    <p><label for="id_file7">File 7:</label> <input type="file" name="file7" required id="id_file7"></p>
-    <br>
-    <button type="submit">Submit</button>
-</form>
+{% block title %}New Submission{% endblock %}
+
+{% block content %}
+    <h2>Upload New Submission</h2>
+    <p>Please provide all 9 parquet files. The first 7 are required.</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="file1">base_consumption.parquet (Required)</label>
+            <input type="file" name="file1" id="file1" required>
+        </div>
+        <div class="form-group">
+            <label for="file2">pv_profiles.parquet (Required)</label>
+            <input type="file" name="file2" id="file2" required>
+        </div>
+        <div class="form-group">
+            <label for="file3">ev_profiles.parquet (Required)</label>
+            <input type="file" name="file3" id="file3" required>
+        </div>
+        <div class="form-group">
+            <label for="file4">hp_profiles.parquet (Required)</label>
+            <input type="file" name="file4" id="file4" required>
+        </div>
+        <div class="form-group">
+            <label for="file5">battery_in_profiles.parquet (Required)</label>
+            <input type="file" name="file5" id="file5" required>
+        </div>
+        <div class="form-group">
+            <label for="file6">battery_out_profiles.parquet (Required)</label>
+            <input type="file" name="file6" id="file6" required>
+        </div>
+        <div class="form-group">
+            <label for="file7">battery_soc_profiles.parquet (Required)</label>
+            <input type="file" name="file7" id="file7" required>
+        </div>
+        <div class="form-group">
+            <label for="file8">curtailed_energy_profiles.parquet (Optional)</label>
+            <input type="file" name="file8" id="file8">
+        </div>
+        <div class="form-group">
+            <label for="file9">power_to_hydro.parquet (Optional)</label>
+            <input type="file" name="file9" id="file9">
+        </div>
+        
+        <button type="submit" class="btn">Submit Files</button>
+    </form>
+{% endblock %}
