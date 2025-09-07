@@ -43,8 +43,12 @@ class Submission(models.Model):
     file8 = models.FileField(upload_to=get_upload_path, blank=True, null=True) # curtailed_energy_profiles.parquet
     file9 = models.FileField(upload_to=get_upload_path, blank=True, null=True) # power_to_hydro.parquet
 
+    is_disqualified = models.BooleanField(default=False, help_text="Check this to hide the submission from the leaderboard and visualization.")
+
     def __str__(self):
-        return f"Submission by {self.user.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+        # Optional: update the string representation to show the status
+        status_str = " (Disqualified)" if self.is_disqualified else ""
+        return f"Submission by {self.user.username} at {self.created_at.strftime('%Y-%m-%d %H:%M')}{status_str}"
     
     # New helper method to list submitted files
     def get_submitted_files(self):

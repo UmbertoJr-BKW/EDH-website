@@ -20,9 +20,16 @@
             </thead>
             <tbody>
                 {% for submission in submissions %}
-                <tr>
+                
+                <tr {% if submission.is_disqualified %}style="background-color: #f8d7da; text-decoration: line-through;"{% endif %}>
                     <td>{{ submission.created_at|date:"Y-m-d H:i" }}</td>
-                    <td>{{ submission.get_status_display }}</td>
+                    <td>
+                        {% if submission.is_disqualified %}
+                            Disqualified
+                        {% else %}
+                            {{ submission.get_status_display }}
+                        {% endif %}
+                    </td>
                     
                     <!-- Display scores if the submission is complete -->
                     {% if submission.status == 'COMPLETE' and submission.evaluationresult %}

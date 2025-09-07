@@ -64,7 +64,9 @@ def leaderboard(request):
         
     # Order the results. The '-' prefix means descending order (higher score is better).
     order_string = f'-{sort_by}'
-    results = EvaluationResult.objects.order_by(order_string)
+
+    # We query through the submission to check the flag
+    results = EvaluationResult.objects.filter(submission__is_disqualified=False).order_by(order_string)
     
     context = {
         'results': results,
@@ -119,7 +121,7 @@ def find_pareto_frontier(scores):
 
 
 def visualize_scores(request):
-    results = EvaluationResult.objects.select_related('submission__user').all()
+    results = EvaluationResult.objects.select_related('submission__user').filter(submission__is_disqualified=False)
     
     # First, get the raw scores
     raw_scores = [
