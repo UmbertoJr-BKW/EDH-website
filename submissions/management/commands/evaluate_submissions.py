@@ -34,10 +34,10 @@ class Command(BaseCommand):
                 EvaluationResult.objects.update_or_create(
                     submission=submission,
                     defaults={
-                        'score_objective_1': score1,
-                        'score_objective_2': score2,
-                        'score_objective_3': score3,
-                        # 'details': {'any': 'extra_info'} # Optional
+                        # --- USE THE NEW FIELD NAMES ---
+                        'grid_costs': score1,
+                        'renewables_installed': score2,
+                        'autarchy_rate': score3,
                     }
                 )
 

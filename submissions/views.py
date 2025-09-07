@@ -52,25 +52,27 @@ def upload_submission(request):
 from .models import Submission, EvaluationResult
 
 def leaderboard(request):
-    # Define valid sort fields to prevent users from sorting by arbitrary columns
-    valid_sort_fields = ['score_objective_1', 'score_objective_2', 'score_objective_3']
+    valid_sort_fields = ['grid_costs', 'renewables_installed', 'autarchy_rate']
+    sort_by = request.GET.get('sort_by', 'grid_costs')
     
-    # Get the sort parameter from the URL, default to the first objective
-    sort_by = request.GET.get('sort_by', 'score_objective_1')
-
-    # Ensure the requested sort field is valid, otherwise use the default
     if sort_by not in valid_sort_fields:
-        sort_by = 'score_objective_1'
+        sort_by = 'grid_costs'
         
-    # Order the results. The '-' prefix means descending order (higher score is better).
-    order_string = f'-{sort_by}'
+    # --- NEW LOGIC FOR SORT ORDER ---
+    # Default to descending (higher is better)
+    order_prefix = '-' 
+    # If we are sorting by grid_costs, switch to ascending (lower is better)
+    if sort_by == 'grid_costs':
+        order_prefix = '' # No prefix means ascending
+    
+    order_string = f'{order_prefix}{sort_by}'
+    # ---------------------------------
 
-    # We query through the submission to check the flag
     results = EvaluationResult.objects.filter(submission__is_disqualified=False).order_by(order_string)
     
     context = {
         'results': results,
-        'current_sort_by': sort_by, # Pass the current sort field to the template
+        'current_sort_by': sort_by,
     }
     return render(request, 'submissions/leaderboard.html', context)
 
@@ -105,14 +107,14 @@ def find_pareto_frontier(scores):
             # - No worse in all other objectives
             
             # Check if other_score dominates current_score
-            if (other_score['s1'] <= current_score['s1'] and 
-                other_score['s2'] >= current_score['s2'] and 
-                other_score['s3'] >= current_score['s3']) and \
-               (other_score['s1'] < current_score['s1'] or 
-                other_score['s2'] > current_score['s2'] or 
-                other_score['s3'] > current_score['s3']):
+            if (other_score['grid_costs'] <= current_score['grid_costs'] and 
+                other_score['renewables_installed'] >= current_score['renewables_installed'] and 
+                other_score['autarchy_rate'] >= current_score['autarchy_rate']) and \
+               (other_score['grid_costs'] < current_score['grid_costs'] or 
+                other_score['renewables_installed'] > current_score['renewables_installed'] or 
+                other_score['autarchy_rate'] > current_score['autarchy_rate']):
                 is_dominated = True
-                break # Dominated, no need to check further
+                break
                 
         if not is_dominated:
             pareto_indices.add(i)
@@ -127,9 +129,10 @@ def visualize_scores(request):
     raw_scores = [
         {
             'user': result.submission.user.username,
-            's1': result.score_objective_1,
-            's2': result.score_objective_2,
-            's3': result.score_objective_3,
+            # --- USE THE NEW FIELD NAMES ---
+            'grid_costs': result.grid_costs,
+            'renewables_installed': result.renewables_installed,
+            'autarchy_rate': result.autarchy_rate,
         }
         for result in results
     ]

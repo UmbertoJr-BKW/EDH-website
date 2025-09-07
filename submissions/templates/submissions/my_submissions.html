@@ -12,9 +12,9 @@
                 <tr>
                     <th>Submitted At</th>
                     <th>Status</th>
-                    <th>Objective 1 Score</th>
-                    <th>Objective 2 Score</th>
-                    <th>Objective 3 Score</th>
+                    <th>Grid Costs</th>
+                    <th>Renewables Installed</th>
+                    <th>Autarchy Rate</th>
                     <th>Files Submitted</th>
                 </tr>
             </thead>
@@ -33,9 +33,9 @@
                     
                     <!-- Display scores if the submission is complete -->
                     {% if submission.status == 'COMPLETE' and submission.evaluationresult %}
-                        <td>{{ submission.evaluationresult.score_objective_1|floatformat:4 }}</td>
-                        <td>{{ submission.evaluationresult.score_objective_2|floatformat:4 }}</td>
-                        <td>{{ submission.evaluationresult.score_objective_3|floatformat:4 }}</td>
+                        <td>{{ submission.evaluationresult.grid_costs|floatformat:4 }}</td>
+                        <td>{{ submission.evaluationresult.renewables_installed|floatformat:4 }}</td>
+                        <td>{{ submission.evaluationresult.autarchy_rate|floatformat:4 }}</td>
                     {% else %}
                         <td colspan="3" style="text-align: center;">N/A</td>
                     {% endif %}

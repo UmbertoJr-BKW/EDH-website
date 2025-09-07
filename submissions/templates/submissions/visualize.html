@@ -40,10 +40,10 @@
             const defaultColor = '#007bff'; // Our primary blue color
 
             jsonData.forEach(submission => {
-                x_coords.push(submission.s1);
-                y_coords.push(submission.s2);
-                z_coords.push(submission.s3);
-                hover_text.push(`User: ${submission.user}<br>Obj 1: ${submission.s1.toFixed(4)}<br>Obj 2: ${submission.s2.toFixed(4)}<br>Obj 3: ${submission.s3.toFixed(4)}`);
+                x_coords.push(submission.grid_costs);
+                y_coords.push(submission.renewables_installed);
+                z_coords.push(submission.autarchy_rate);
+                hover_text.push(`User: ${submission.user}<br>Grid Costs: ${submission.grid_costs.toFixed(4)}<br>Renewables: ${submission.renewables_installed.toFixed(4)}<br>Autarchy: ${submission.autarchy_rate.toFixed(4)}`);
                 
                 // Use the 'is_pareto' flag to choose the color
                 if (submission.is_pareto) {
@@ -74,9 +74,9 @@
                 title: 'Submission Scores Distribution (Pareto Frontier in Red)',
                 margin: { l: 0, r: 0, b: 0, t: 40 },
                 scene: {
-                    xaxis: { title: 'Objective 1 (Minimize)' },
-                    yaxis: { title: 'Objective 2 (Maximize)' },
-                    zaxis: { title: 'Objective 3 (Maximize)' }
+                    xaxis: { title: 'Grid Costs (Minimize)' },
+                    yaxis: { title: 'Renewables Installed (Maximize)' },
+                    zaxis: { title: 'Autarchy Rate (Maximize)' }
                 }
             };
 

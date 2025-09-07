@@ -14,15 +14,14 @@
                     <th>Rank</th>
                     <th>User</th>
                     
-                    <!-- Clickable Sorting Headers -->
-                    <th class="{% if current_sort_by == 'score_objective_1' %}active{% endif %}">
-                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_1">Objective 1 Score ▼</a>
+                    <th class="{% if current_sort_by == 'grid_costs' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=grid_costs">Grid Costs (min) ▼</a>
                     </th>
-                    <th class="{% if current_sort_by == 'score_objective_2' %}active{% endif %}">
-                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_2">Objective 2 Score ▼</a>
+                    <th class="{% if current_sort_by == 'renewables_installed' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=renewables_installed">Renewables Installed (max) ▼</a>
                     </th>
-                    <th class="{% if current_sort_by == 'score_objective_3' %}active{% endif %}">
-                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_3">Objective 3 Score ▼</a>
+                    <th class="{% if current_sort_by == 'autarchy_rate' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=autarchy_rate">Autarchy Rate (max) ▼</a>
                     </th>
                     
                     <th>Submitted At</th>
@@ -34,11 +33,10 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ result.submission.user.username }}</td>
                     
-                    <!-- Display the three scores -->
-                    <td>{{ result.score_objective_1|floatformat:4 }}</td>
-                    <td>{{ result.score_objective_2|floatformat:4 }}</td>
-                    <td>{{ result.score_objective_3|floatformat:4 }}</td>
-
+                    <td>{{ result.grid_costs|floatformat:4 }}</td>
+                    <td>{{ result.renewables_installed|floatformat:4 }}</td>
+                    <td>{{ result.autarchy_rate|floatformat:4 }}</td>
+        
                     <td>{{ result.submission.created_at|date:"Y-m-d H:i" }}</td>
                 </tr>
                 {% endfor %}

@@ -64,16 +64,18 @@ class Submission(models.Model):
 class EvaluationResult(models.Model):
     submission = models.OneToOneField(Submission, on_delete=models.CASCADE, primary_key=True)
     
-    # --- MODIFIED FIELDS ---
-    # Replace the single score field with three
-    score_objective_1 = models.FloatField(default=0.0)
-    score_objective_2 = models.FloatField(default=0.0)
-    score_objective_3 = models.FloatField(default=0.0)
-    # -----------------------
+    # --- RENAME THESE FIELDS ---
+    grid_costs = models.FloatField(default=0.0)             # Was score_objective_1
+    renewables_installed = models.FloatField(default=0.0)   # Was score_objective_2
+    autarchy_rate = models.FloatField(default=0.0)          # Was score_objective_3
+    # ---------------------------
 
     details = models.JSONField(blank=True, null=True)
     evaluated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        # Update the string representation to be more informative
-        return f"Result for {self.submission}: O1={self.score_objective_1}, O2={self.score_objective_2}, O3={self.score_objective_3}"
+        # Update the string representation
+        return (f"Result for {self.submission}: "
+                f"Grid Costs={self.grid_costs}, "
+                f"Renewables={self.renewables_installed}, "
+                f"Autarchy={self.autarchy_rate}")
