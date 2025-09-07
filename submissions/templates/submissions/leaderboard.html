@@ -1,9 +1,11 @@
+<!-- submissions/templates/submissions/leaderboard.html -->
 {% extends "base.html" %}
 
 {% block title %}Leaderboard{% endblock %}
 
 {% block content %}
     <h1>Leaderboard</h1>
+    <p>Click on a column header to sort.</p>
     
     {% if results %}
         <table class="table">
@@ -11,7 +13,18 @@
                 <tr>
                     <th>Rank</th>
                     <th>User</th>
-                    <th>Score</th>
+                    
+                    <!-- Clickable Sorting Headers -->
+                    <th class="{% if current_sort_by == 'score_objective_1' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_1">Objective 1 Score ▼</a>
+                    </th>
+                    <th class="{% if current_sort_by == 'score_objective_2' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_2">Objective 2 Score ▼</a>
+                    </th>
+                    <th class="{% if current_sort_by == 'score_objective_3' %}active{% endif %}">
+                        <a href="{% url 'leaderboard' %}?sort_by=score_objective_3">Objective 3 Score ▼</a>
+                    </th>
+                    
                     <th>Submitted At</th>
                 </tr>
             </thead>
@@ -20,7 +33,12 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ result.submission.user.username }}</td>
-                    <td>{{ result.score|floatformat:4 }}</td>
+                    
+                    <!-- Display the three scores -->
+                    <td>{{ result.score_objective_1|floatformat:4 }}</td>
+                    <td>{{ result.score_objective_2|floatformat:4 }}</td>
+                    <td>{{ result.score_objective_3|floatformat:4 }}</td>
+
                     <td>{{ result.submission.created_at|date:"Y-m-d H:i" }}</td>
                 </tr>
                 {% endfor %}

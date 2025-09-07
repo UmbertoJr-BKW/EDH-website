@@ -51,9 +51,25 @@ def upload_submission(request):
 from .models import Submission, EvaluationResult
 
 def leaderboard(request):
-    # Get all results, order by the highest score first
-    results = EvaluationResult.objects.order_by('-score')
-    return render(request, 'submissions/leaderboard.html', {'results': results})
+    # Define valid sort fields to prevent users from sorting by arbitrary columns
+    valid_sort_fields = ['score_objective_1', 'score_objective_2', 'score_objective_3']
+    
+    # Get the sort parameter from the URL, default to the first objective
+    sort_by = request.GET.get('sort_by', 'score_objective_1')
+
+    # Ensure the requested sort field is valid, otherwise use the default
+    if sort_by not in valid_sort_fields:
+        sort_by = 'score_objective_1'
+        
+    # Order the results. The '-' prefix means descending order (higher score is better).
+    order_string = f'-{sort_by}'
+    results = EvaluationResult.objects.order_by(order_string)
+    
+    context = {
+        'results': results,
+        'current_sort_by': sort_by, # Pass the current sort field to the template
+    }
+    return render(request, 'submissions/leaderboard.html', context)
 
 @login_required
 def my_submissions(request):

@@ -58,11 +58,18 @@ class Submission(models.Model):
         return files
     
 class EvaluationResult(models.Model):
-    # A one-to-one link to the submission it evaluates
     submission = models.OneToOneField(Submission, on_delete=models.CASCADE, primary_key=True)
-    score = models.FloatField()
-    details = models.JSONField(blank=True, null=True) # For storing more complex results
+    
+    # --- MODIFIED FIELDS ---
+    # Replace the single score field with three
+    score_objective_1 = models.FloatField(default=0.0)
+    score_objective_2 = models.FloatField(default=0.0)
+    score_objective_3 = models.FloatField(default=0.0)
+    # -----------------------
+
+    details = models.JSONField(blank=True, null=True)
     evaluated_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Result for {self.submission}: Score {self.score}"
+        # Update the string representation to be more informative
+        return f"Result for {self.submission}: O1={self.score_objective_1}, O2={self.score_objective_2}, O3={self.score_objective_3}"

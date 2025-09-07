@@ -1,3 +1,4 @@
+<!-- submissions/templates/submissions/my_submissions.html -->
 {% extends "base.html" %}
 
 {% block title %}My Submissions{% endblock %}
@@ -11,7 +12,9 @@
                 <tr>
                     <th>Submitted At</th>
                     <th>Status</th>
-                    <th>Score</th>
+                    <th>Objective 1 Score</th>
+                    <th>Objective 2 Score</th>
+                    <th>Objective 3 Score</th>
                     <th>Files Submitted</th>
                 </tr>
             </thead>
@@ -20,13 +23,16 @@
                 <tr>
                     <td>{{ submission.created_at|date:"Y-m-d H:i" }}</td>
                     <td>{{ submission.get_status_display }}</td>
-                    <td>
-                        {% if submission.status == 'COMPLETE' and submission.evaluationresult %}
-                            {{ submission.evaluationresult.score|floatformat:4 }}
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
+                    
+                    <!-- Display scores if the submission is complete -->
+                    {% if submission.status == 'COMPLETE' and submission.evaluationresult %}
+                        <td>{{ submission.evaluationresult.score_objective_1|floatformat:4 }}</td>
+                        <td>{{ submission.evaluationresult.score_objective_2|floatformat:4 }}</td>
+                        <td>{{ submission.evaluationresult.score_objective_3|floatformat:4 }}</td>
+                    {% else %}
+                        <td colspan="3" style="text-align: center;">N/A</td>
+                    {% endif %}
+
                     <td>
                         <ul class="file-list">
                             {% for filename in submission.get_submitted_files %}

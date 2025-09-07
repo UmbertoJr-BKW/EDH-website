@@ -184,3 +184,19 @@ h1, h2 {
 .nav-button-link:hover {
     color: var(--primary-color); /* Match the hover effect */
 }
+
+
+.table th a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.table th.active {
+    background-color: #e9ecef;
+}
+
+.table th.active a {
+    color: var(--primary-color);
+    font-weight: 700;
+}

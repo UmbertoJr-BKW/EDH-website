@@ -1,56 +1,52 @@
 # submissions/management/commands/evaluate_submissions.py
+# (This is an example, you need to adapt it)
 
-import pandas as pd
+# Make sure to import random if you are testing with random scores
+import random 
 from django.core.management.base import BaseCommand
-from submissions.models import Submission, EvaluationResult, SubmissionStatus
-from storages.backends.gcloud import GoogleCloudStorage # <-- IMPORT
+from submissions.models import Submission, SubmissionStatus, EvaluationResult
 
 class Command(BaseCommand):
-    help = 'Evaluates all pending submissions'
+    help = 'Evaluates pending submissions'
 
     def handle(self, *args, **options):
-        # Manually instantiate the storage backend, just like in the view
-        storage = GoogleCloudStorage()
-
         pending_submissions = Submission.objects.filter(status=SubmissionStatus.PENDING)
+        self.stdout.write(f"Found {pending_submissions.count()} submissions to evaluate.")
 
-        if not pending_submissions.exists():
-            self.stdout.write(self.style.SUCCESS('No pending submissions to evaluate.'))
-            return
-
-        for sub in pending_submissions:
-            self.stdout.write(f'Processing submission {sub.id} from {sub.user.username}...')
-            sub.status = SubmissionStatus.PROCESSING
-            sub.save()
-
+        for submission in pending_submissions:
             try:
-                # --- THIS IS THE KEY CHANGE ---
-                # Instead of sub.file1.path, we use storage.open()
-                with storage.open(sub.file1.name) as f:
-                    df1 = pd.read_parquet(f)
-                with storage.open(sub.file2.name) as f:
-                    df2 = pd.read_parquet(f)
-                # ... repeat for all 7 files ...
+                submission.status = SubmissionStatus.PROCESSING
+                submission.save()
 
-                # Your evaluation logic remains the same
-                calculated_score = len(df1)
+                # --- YOUR SCORING LOGIC GOES HERE ---
+                # 1. Download the files from GCS for this submission.
+                # 2. Run your three objective functions.
+                # 3. Get the three scores.
                 
-                EvaluationResult.objects.create(
-                    submission=sub,
-                    score=calculated_score,
-                    details={'message': 'Evaluation successful', 'num_rows': calculated_score}
+                # --- EXAMPLE with placeholder scores ---
+                # Replace this with your actual calculations
+                score1 = random.uniform(80.0, 100.0) 
+                score2 = random.uniform(500.0, 1000.0)
+                score3 = random.uniform(0.1, 0.9)
+                # --- End of example ---
+
+                # Use update_or_create to save the results
+                EvaluationResult.objects.update_or_create(
+                    submission=submission,
+                    defaults={
+                        'score_objective_1': score1,
+                        'score_objective_2': score2,
+                        'score_objective_3': score3,
+                        # 'details': {'any': 'extra_info'} # Optional
+                    }
                 )
 
-                sub.status = SubmissionStatus.COMPLETE
-                sub.save()
-                self.stdout.write(self.style.SUCCESS(f'Successfully evaluated submission {sub.id}. Score: {calculated_score}'))
+                submission.status = SubmissionStatus.COMPLETE
+                self.stdout.write(self.style.SUCCESS(f"Successfully evaluated submission {submission.id}"))
 
             except Exception as e:
-                sub.status = SubmissionStatus.ERROR
-                sub.save()
-                EvaluationResult.objects.create(
-                    submission=sub,
-                    score=0,
-                    details={'error': str(e)}
-                )
-                self.stderr.write(self.style.ERROR(f'Error evaluating submission {sub.id}: {e}'))
+                submission.status = SubmissionStatus.ERROR
+                self.stdout.write(self.style.ERROR(f"Error evaluating submission {submission.id}: {e}"))
+            
+            finally:
+                submission.save()
