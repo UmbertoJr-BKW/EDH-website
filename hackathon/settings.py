@@ -59,12 +59,14 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', 
     'django.contrib.staticfiles',
     'submissions'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -142,15 +144,20 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# --- Static Files Configuration for Production ---
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# This is where Django will collect all static files from your apps
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
+# This tells WhiteNoise to look for files in STATIC_ROOT
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# --- Google Cloud Storage Configuration ---
+# Your existing GCS configuration is good, just ensure it's below the static files part.
+# The DEFAULT_FILE_STORAGE setting will handle user uploads, while the settings
+# above handle your app's static files (CSS, JS).
 
 
 # --- Google Cloud Storage Configuration ---

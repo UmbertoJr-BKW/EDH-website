@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# build.sh
+
 # exit on error
 set -o errexit
 

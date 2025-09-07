@@ -25,7 +25,7 @@ The platform is built with Python and Django and uses Google Cloud Storage for r
 
 ```
 /
-├── .env.example        # Example environment variables file
+├── .env                # Environment variables file
 ├── hackathon/          # Django project configuration
 │   ├── settings.py     # Main project settings
 │   ├── urls.py         # Root URL configuration
@@ -146,7 +146,7 @@ The application will be available at `http://127.0.0.1:8000/`. You can log in to
 
 ---
 
-## Production Deployment (Example: Render)
+## Production Deployment (Render)
 
 This application is configured for easy deployment to a Platform-as-a-Service (PaaS) like Render.
 
