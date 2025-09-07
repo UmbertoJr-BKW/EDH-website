@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Score Visualization{% endblock %}
+
+{% block content %}
+    <h2>3D Score Visualization</h2>
+    <p>This plot shows all submissions across the three objective functions. You can click and drag to rotate, and scroll to zoom.</p>
+
+    {% if scores_data %}
+        <div id="plotContainer" style="width:100%; height:650px;"></div>
+
+        <!-- 
+        CHANGE IS HERE: Pass the Python list 'scores_data' directly to json_script.
+        This will create a <script> tag with correctly formatted JSON.
+        -->
+        {{ scores_data|json_script:"scores-data" }}
+
+    {% else %}
+        <p>There are no evaluated submissions to visualize yet.</p>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+
+    <script>
+        const scoresDataElement = document.getElementById('scores-data');
+        
+        if (scoresDataElement) {
+            const jsonData = JSON.parse(scoresDataElement.textContent);
+
+            // --- CHANGES START HERE ---
+            const x_coords = [];
+            const y_coords = [];
+            const z_coords = [];
+            const hover_text = [];
+            const point_colors = []; // New array for colors
+
+            const paretoColor = '#dc3545'; // A nice red color
+            const defaultColor = '#007bff'; // Our primary blue color
+
+            jsonData.forEach(submission => {
+                x_coords.push(submission.s1);
+                y_coords.push(submission.s2);
+                z_coords.push(submission.s3);
+                hover_text.push(`User: ${submission.user}<br>Obj 1: ${submission.s1.toFixed(4)}<br>Obj 2: ${submission.s2.toFixed(4)}<br>Obj 3: ${submission.s3.toFixed(4)}`);
+                
+                // Use the 'is_pareto' flag to choose the color
+                if (submission.is_pareto) {
+                    point_colors.push(paretoColor);
+                } else {
+                    point_colors.push(defaultColor);
+                }
+            });
+
+            const trace = {
+                x: x_coords,
+                y: y_coords,
+                z: z_coords,
+                text: hover_text,
+                hoverinfo: 'text',
+                mode: 'markers',
+                type: 'scatter3d',
+                marker: {
+                    size: 6, // Slightly larger points
+                    // The color property can now be an array of colors
+                    color: point_colors, 
+                    opacity: 0.8
+                }
+            };
+            // --- CHANGES END HERE ---
+
+            const layout = {
+                title: 'Submission Scores Distribution (Pareto Frontier in Red)',
+                margin: { l: 0, r: 0, b: 0, t: 40 },
+                scene: {
+                    xaxis: { title: 'Objective 1 (Minimize)' },
+                    yaxis: { title: 'Objective 2 (Maximize)' },
+                    zaxis: { title: 'Objective 3 (Maximize)' }
+                }
+            };
+
+            Plotly.newPlot('plotContainer', [trace], layout);
+        }
+    </script>
+{% endblock %}

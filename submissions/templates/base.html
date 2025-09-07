@@ -18,6 +18,7 @@
             </a>
             <ul>
                 <li><a href="{% url 'leaderboard' %}">Leaderboard</a></li>
+                <li><a href="{% url 'visualize_scores' %}">Visualize</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'my_submissions' %}">My Submissions</a></li>
                     <li><a href="{% url 'upload_submission' %}" class="btn">New Submission</a></li>
@@ -43,5 +44,8 @@
             </div>
         </div>
     </main>
+    
+    {% block extra_scripts %}
+    {% endblock %}
 </body>
 </html>

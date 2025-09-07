@@ -1,4 +1,5 @@
 # submissions/views.py
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Submission, EvaluationResult
@@ -76,3 +77,75 @@ def my_submissions(request):
     # Get submissions only for the currently logged-in user
     user_submissions = Submission.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'submissions/my_submissions.html', {'submissions': user_submissions})
+
+
+def find_pareto_frontier(scores):
+    """
+    Identifies the Pareto optimal frontier from a list of scores.
+    Each score is a dict with 's1', 's2', 's3'.
+    Objective: Minimize s1, Maximize s2, Maximize s3.
+    """
+    pareto_indices = set()
+    num_scores = len(scores)
+    
+    for i in range(num_scores):
+        current_score = scores[i]
+        is_dominated = False
+        
+        for j in range(num_scores):
+            if i == j:
+                continue
+            
+            other_score = scores[j]
+            
+            # A point is dominated if another point is:
+            # - Strictly better in at least one objective
+            # - No worse in all other objectives
+            
+            # Check if other_score dominates current_score
+            if (other_score['s1'] <= current_score['s1'] and 
+                other_score['s2'] >= current_score['s2'] and 
+                other_score['s3'] >= current_score['s3']) and \
+               (other_score['s1'] < current_score['s1'] or 
+                other_score['s2'] > current_score['s2'] or 
+                other_score['s3'] > current_score['s3']):
+                is_dominated = True
+                break # Dominated, no need to check further
+                
+        if not is_dominated:
+            pareto_indices.add(i)
+            
+    return pareto_indices
+
+
+def visualize_scores(request):
+    results = EvaluationResult.objects.select_related('submission__user').all()
+    
+    # First, get the raw scores
+    raw_scores = [
+        {
+            'user': result.submission.user.username,
+            's1': result.score_objective_1,
+            's2': result.score_objective_2,
+            's3': result.score_objective_3,
+        }
+        for result in results
+    ]
+    
+    # --- NEW LOGIC INTEGRATION ---
+    # Find the indices of the points on the frontier
+    pareto_indices = find_pareto_frontier(raw_scores)
+    
+    # Now, add the 'is_pareto' flag to our data
+    # We rebuild the list to ensure the order is maintained
+    score_data_with_pareto = []
+    for i, score in enumerate(raw_scores):
+        score['is_pareto'] = (i in pareto_indices)
+        score_data_with_pareto.append(score)
+    # ----------------------------
+
+    context = {
+        'scores_data': score_data_with_pareto
+    }
+    
+    return render(request, 'submissions/visualize.html', context)
