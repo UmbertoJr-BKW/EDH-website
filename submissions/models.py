@@ -4,6 +4,7 @@ import uuid
 import os
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 
 # Defines the state of a submission
@@ -12,6 +13,14 @@ class SubmissionStatus(models.TextChoices):
     PROCESSING = 'PROCESSING', 'Processing'
     COMPLETE = 'COMPLETE', 'Complete'
     ERROR = 'ERROR', 'Error'
+
+def get_upload_path(instance, filename):
+    # Sanitize the filename to remove spaces and special characters
+    base_name, extension = os.path.splitext(filename)
+    safe_filename = f"{slugify(base_name)}{extension}"
+    
+    path = f'uploads/{instance.user.username}/{instance.id}/{safe_filename}'
+    return path
 
 class Submission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -60,22 +69,49 @@ class Submission(models.Model):
                 # os.path.basename gets just the filename from the full path
                 files.append(os.path.basename(field.name))
         return files
-    
-class EvaluationResult(models.Model):
-    submission = models.OneToOneField(Submission, on_delete=models.CASCADE, primary_key=True)
-    
-    # --- RENAME THESE FIELDS ---
-    grid_costs = models.FloatField(default=0.0)             # Was score_objective_1
-    renewables_installed = models.FloatField(default=0.0)   # Was score_objective_2
-    autarchy_rate = models.FloatField(default=0.0)          # Was score_objective_3
-    # ---------------------------
 
+class EvaluationResult(models.Model):
+    # CHANGED: From OneToOneField to ForeignKey to allow multiple results per submission.
+    submission = models.ForeignKey(Submission, on_delete=models.CASCADE, related_name='results')
+    
+    # NEW: Field to identify the station this result belongs to.
+    station_name = models.CharField(max_length=100)
+
+    # These fields now store per-station data.
+    grid_costs = models.FloatField(default=0.0)
+    renewables_installed = models.FloatField(default=0.0)
+    autarchy_rate = models.FloatField(default=0.0)
+    
     details = models.JSONField(blank=True, null=True)
     evaluated_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # Ensure a submission can only have one result per station.
+        unique_together = ('submission', 'station_name')
+        ordering = ['submission', 'station_name']
+
     def __str__(self):
-        # Update the string representation
-        return (f"Result for {self.submission}: "
+        # Update the string representation to include the station.
+        return (f"Result for station '{self.station_name}' in {self.submission}: "
                 f"Grid Costs={self.grid_costs}, "
                 f"Renewables={self.renewables_installed}, "
-                f"Autarchy={self.autarchy_rate}")
+                f"Autarchy={self.autarchy_rate}")    
+
+# class EvaluationResult(models.Model):
+#     submission = models.OneToOneField(Submission, on_delete=models.CASCADE, primary_key=True)
+    
+#     # --- RENAME THESE FIELDS ---
+#     grid_costs = models.FloatField(default=0.0)             # Was score_objective_1
+#     renewables_installed = models.FloatField(default=0.0)   # Was score_objective_2
+#     autarchy_rate = models.FloatField(default=0.0)          # Was score_objective_3
+#     # ---------------------------
+
+#     details = models.JSONField(blank=True, null=True)
+#     evaluated_at = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         # Update the string representation
+#         return (f"Result for {self.submission}: "
+#                 f"Grid Costs={self.grid_costs}, "
+#                 f"Renewables={self.renewables_installed}, "
+#                 f"Autarchy={self.autarchy_rate}")
